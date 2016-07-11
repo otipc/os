@@ -1,0 +1,5 @@
+id,name,age,addr
+0001,otipc,31,shanghai
+0002,cui,33,henan
+0003,ttt,40,henan
+0004,otipc,31,hunan

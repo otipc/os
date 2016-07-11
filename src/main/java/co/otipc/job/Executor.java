@@ -35,9 +35,14 @@ public class Executor {
 
   public List<String> exec(Job job) throws IOException {
     this.job = job;
+
+    ClassLoader classLoader = this.getClass().getClassLoader();
+
+    File file = new File(classLoader.getResource("file/" +this.job.getTable()+".txt").getFile());
+    
     result = new ArrayList<>();
     table_source =
-      FileUtils.readLines(new File(dir + this.job.getTable() + ".txt"), Charset.defaultCharset());
+      FileUtils.readLines(file, Charset.defaultCharset());
 
     columns = table_source.get(0).split(",");
     mapIndex = SqlUtils.parserToMap(columns);
