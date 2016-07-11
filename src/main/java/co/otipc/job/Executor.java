@@ -39,7 +39,7 @@ public class Executor {
     ClassLoader classLoader = this.getClass().getClassLoader();
 
     File file = new File(classLoader.getResource("file/" +this.job.getTable()+".txt").getFile());
-    
+
     result = new ArrayList<>();
     table_source =
       FileUtils.readLines(file, Charset.defaultCharset());
