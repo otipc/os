@@ -1,5 +1,7 @@
 package co.otipc.job;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.List;
 
 /**
@@ -7,10 +9,30 @@ import java.util.List;
  */
 public class Conditions {
 
+  String type = null;
 
-  String type;
-
-  List<item>
+  List<Condition> items;
 
 
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public List<Condition> getItems() {
+    return items;
+  }
+
+  public void setItems(List<Condition> items) {
+    this.items = items;
+  }
+
+
+
+  @Override public String toString() {
+    return ToStringBuilder.reflectionToString(this);
+  }
 }
