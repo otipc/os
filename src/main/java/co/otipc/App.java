@@ -55,7 +55,7 @@ public class App {
     for (String str : result) {
       System.out.println(str);
     }
-    
+
 
 
   }
