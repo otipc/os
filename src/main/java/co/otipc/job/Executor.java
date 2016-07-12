@@ -34,12 +34,9 @@ public class Executor {
   public static List<String> exec(Job j) throws IOException {
     job = j;
 
-    File file = new File(
-      Executor.class.getClassLoader().getResource("file/" + job.getTable() + ".txt").getFile());
-
     result = new ArrayList<>();
 
-    table_source = FileUtils.readLines(file, Charset.defaultCharset());
+    table_source = readFile(job.getTable());
 
     columns = table_source.get(0).split(",");
     mapIndex = SqlUtils.parserToMap(columns);
@@ -49,6 +46,31 @@ public class Executor {
     doGetResultSet();
 
     return result;
+
+  }
+
+  private static List<String> join(String left_table, String right_table) throws IOException {
+
+
+    List<String> left_table_source = readFile(left_table);
+    List<String> right_table_source = readFile(right_table);
+
+    return JoinMethod.doJoin(left_table_source, right_table_source);
+
+  }
+
+
+  private static List<String> readFile(File file) throws IOException {
+    return FileUtils.readLines(file, Charset.defaultCharset());
+  }
+
+  private static List<String> readFile(String tableName) throws IOException {
+    return readFile(getFile(tableName));
+  }
+
+  private static File getFile(String tableName) {
+    return new File(
+      Executor.class.getClassLoader().getResource("file/" + tableName + ".txt").getFile());
 
   }
 

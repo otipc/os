@@ -1,28 +1,16 @@
 package co.otipc;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.SetStatement;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.StatementVisitor;
-import net.sf.jsqlparser.statement.Statements;
-import net.sf.jsqlparser.statement.alter.Alter;
-import net.sf.jsqlparser.statement.create.index.CreateIndex;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.create.view.CreateView;
-import net.sf.jsqlparser.statement.delete.Delete;
-import net.sf.jsqlparser.statement.drop.Drop;
-import net.sf.jsqlparser.statement.execute.Execute;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.merge.Merge;
-import net.sf.jsqlparser.statement.replace.Replace;
-import net.sf.jsqlparser.statement.select.*;
-import net.sf.jsqlparser.statement.truncate.Truncate;
-import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
 
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,164 +18,82 @@ import java.util.List;
  */
 public class MainTest {
 
-  //实现从SQL中提取表名
-  public static final List<String> getTables(String sql) {
-    CCJSqlParserManager parserManager = new CCJSqlParserManager();
-    Statement stmt;
-    try {
-      //解析SQL语句
-      stmt = parserManager.parse(new StringReader(sql));
-    } catch (JSQLParserException e) {
-      return null;
-    }
-    final List<String> tableNames = new ArrayList<String>();
-    //使用visitor模式访问SQL的各个组成部分
-    stmt.accept(new MyStatementVisitor(tableNames));
-    return tableNames;
-  }
-
-  static class MySelectVisitor implements SelectVisitor {
-
-    List<String> tableNames;
-
-    public MySelectVisitor(List<String> tableNames) {
-      this.tableNames = tableNames;
-    }
-
-    @Override public void visit(SetOperationList setOpList) {
-
-    }
-
-    @Override public void visit(WithItem withItem) {
-
-    }
-
-    @Override
-    public void visit(PlainSelect ps) {
-      FromItemVisitor fromItemVisitor = new FromItemVisitor() {
-
-        @Override
-        public void visit(Table table) {
-          tableNames.add(table.getName());
-        }
-
-        @Override public void visit(LateralSubSelect lateralSubSelect) {
-
-        }
-
-        @Override public void visit(TableFunction tableFunction) {
-
-        }
-
-        @Override public void visit(ValuesList valuesList) {
-
-        }
-
-        @Override
-        public void visit(SubSelect ss) {
-          ss.getSelectBody().accept(new MySelectVisitor(tableNames));
-        }
-
-        @Override
-        public void visit(SubJoin sj) {
-          sj.getLeft().accept(this);
-          sj.getJoin().getRightItem().accept(this);
-        }
-
-      };
-
-      ps.getFromItem().accept(fromItemVisitor);
-
-      List<Join> joins = ps.getJoins();
-      if (joins != null) {
-        for (Join join : joins) {
-          join.getRightItem().accept(fromItemVisitor);
-        }
-      }
-    }
-
-
-  }
-
-  static class MyStatementVisitor implements StatementVisitor {
-    List<String> tableNames;
-
-    public MyStatementVisitor(List<String> tableNames) {
-      this.tableNames = tableNames;
-    }
-
-    @Override public void visit(Merge merge) {
-
-    }
-
-    @Override public void visit(Alter alter) {
-
-    }
-
-    @Override public void visit(CreateIndex createIndex) {
-
-    }
-
-    @Override public void visit(CreateView createView) {
-
-    }
-
-    @Override public void visit(Execute execute) {
-
-    }
-
-    @Override public void visit(SetStatement set) {
-
-    }
-
-    @Override public void visit(Statements stmts) {
-
-    }
-
-    //访问select语句
-    public void visit(Select select) {
-      //访问select的各个组成部分
-      select.getSelectBody().accept(new MySelectVisitor(tableNames));
-    }
-
-    //访问delete语句
-    public void visit(Delete delete) {
-      tableNames.add(delete.getTable().getName());
-    }
-
-    //访问update语句
-    public void visit(Update update) {
-      for(Table table:update.getTables()){
-        tableNames.add(table.getName());
-      }
-
-    }
-
-    //访问insert语句
-    public void visit(Insert insert) {
-      tableNames.add(insert.getTable().getName());
-    }
-
-    //访问replace，忽略
-    public void visit(Replace replace) {
-    }
-
-    //访问drop，忽略
-    public void visit(Drop drop) {
-    }
-
-    //访问truncate，忽略
-    public void visit(Truncate truncate) {
-    }
-
-    //访问create，忽略
-    public void visit(CreateTable arg0) {
-    }
-  }
 
   public static void main(String[] args) throws JSQLParserException {
-    System.out.println(getTables("select * from  (select * from table_a left outer join table_b on table_a.aa=table_b.bb)"));
-    //输出结果：[table_a, table_b]
+
+
+    String sql = "select * from table_1 where id=0001 or age=31 and name='otipc'";
+
+    String ss = "select  A.ID as AID, B.ID as BID  from A left join B on A.ID = B.ID where B.ID<3 ";
+
+    String xx = "select  A.ID as AID, B.ID as BID  from A left join B on A.ID = B.ID and  B.ID<3";
+
+    String leftjoin = "SELECT * FROM a LEFT JOIN  b ON a.aID =b.bID ";
+
+    //    aID        aNum                   bID           bName
+    //    1            a20050111         1               2006032401
+    //    2            a20050112         2              2006032402
+    //    3            a20050113         3              2006032403
+    //    4            a20050114         4              2006032404
+    //    5            a20050115         NULL       NULL
+
+    String rightjoin = "SELECT  * FROM a RIGHT JOING b ON a.aID = b.bID ";
+
+    //    aID        aNum                   bID           bName
+    //    1            a20050111         1               2006032401
+    //    2            a20050112         2              2006032402
+    //    3            a20050113         3              2006032403
+    //    4            a20050114         4              2006032404
+    //    NULL    NULL                   8              2006032408
+
+    String innerjoin = "SELECT * FROM  a INNER JOIN  b ON a.aID =b.bID ";
+    String innerjoin2 = "SELECT *  FROM a,b WHERE a.aID = b.bID";
+
+    //    aID        aNum                   bID           bName
+    //    1            a20050111         1              2006032401
+    //    2            a20050112         2              2006032402
+    //    3            a20050113         3              2006032403
+    //    4            a20050114         4              2006032404
+
+
+    Statement parse = CCJSqlParserUtil.parse(innerjoin2);
+    Select select = (Select) parse;
+    PlainSelect ps = (PlainSelect) select.getSelectBody();
+
+    System.out.println(ps.getSelectItems());
+
+    System.out.println(ps.getFromItem());
+
+    System.out.println(ps.getJoins());
+
+    List<Join> joins = ps.getJoins();
+    for (Join join : joins) {
+
+      System.out.println(join.isSimple());
+      System.out.println(join.isLeft());
+      System.out.println(join.isFull());
+      System.out.println(join.isInner());
+      System.out.println(join.isNatural());
+      System.out.println(join.isOuter());
+      System.out.println(join.isRight());
+
+      System.out.println(" === " + join.getRightItem());
+      System.out.println(join.getOnExpression());
+
+    }
+
+    Expression expression = ps.getWhere();
+
+    if (null != expression) {
+      System.out.println(expression instanceof AndExpression);
+      System.out.println(expression instanceof OrExpression);
+
+      System.out.println(((BinaryExpression) expression).getLeftExpression());
+      System.out.println(((BinaryExpression) expression).getRightExpression());
+    }
+
+
+
   }
 
 

@@ -3,10 +3,7 @@ package co.otipc.plain;
 
 import co.otipc.job.Job;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.statement.select.FromItem;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,24 +39,36 @@ public class VisitorSelect {
     }
 
     if (null != plain.getJoins()) {
-      List<Object> joins = new ArrayList<>();
+
+      job.setSubJobs(plain.getJoins());
+
       for (int i = 0; i < plain.getJoins().size(); i++) {
-        FromItem fromItem = plain.getJoins().get(i).getRightItem();
-        if (fromItem instanceof SubSelect) {
-          SubSelect subSelect = (SubSelect) fromItem;
-          final PlainSelect subPs = (PlainSelect) subSelect.getSelectBody();
-          if (null != subPs) {
-            Job innerJob = new Job();
-            doSelect(innerJob, subPs);
-            List<String> result = innerJob.doExec();
-            //todo  write to temp file
-          } else {
-            joins.add(fromItem.toString());
-          }
-        } else {
-          joins.add(fromItem.toString());
+        Join join = plain.getJoins().get(i);
+        if(join.isSimple()){
+
         }
+
       }
+
+
+      //      List<Object> joins = new ArrayList<>();
+      //      for (int i = 0; i < plain.getJoins().size(); i++) {
+      //        FromItem fromItem = plain.getJoins().get(i).getRightItem();
+      //        if (fromItem instanceof SubSelect) {
+      //          SubSelect subSelect = (SubSelect) fromItem;
+      //          final PlainSelect subPs = (PlainSelect) subSelect.getSelectBody();
+      //          if (null != subPs) {
+      //            Job innerJob = new Job();
+      //            doSelect(innerJob, subPs);
+      //            List<String> result = innerJob.doExec();
+      //            //todo  write to temp file
+      //          } else {
+      //            joins.add(fromItem.toString());
+      //          }
+      //        } else {
+      //          joins.add(fromItem.toString());
+      //        }
+      //      }
 
     }
 
