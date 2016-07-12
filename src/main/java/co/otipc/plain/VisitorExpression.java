@@ -60,6 +60,7 @@ public class VisitorExpression {
         doExpr(job, left);
 
       } else if (expression instanceof SubSelect) {
+
         SubSelect subSelect = (SubSelect) expression;
         PlainSelect plain = (PlainSelect) subSelect.getSelectBody();
         Job innerJob = new Job();
@@ -68,6 +69,7 @@ public class VisitorExpression {
         job.getConditions().getItems().getLast().setValue(result);
 
       } else if (expression instanceof InExpression) {
+
         Condition condition = new Condition();
         condition.setType("in");
         job.getConditions().getItems().add(condition);
@@ -85,6 +87,7 @@ public class VisitorExpression {
         } else {
           job.getConditions().getItems().getLast().setValue(items);
         }
+
       } else if (expression instanceof Column) {
         Column column = (Column) expression;
         job.getConditions().getItems().getLast().setColumn(column.getColumnName().toString());

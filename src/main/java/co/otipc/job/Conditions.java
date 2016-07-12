@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class Conditions {
 
-  String type = null;
+  private String type = null;
 
-  LinkedList<Condition> items = new LinkedList<>();
+  private LinkedList<Condition> items = new LinkedList<>();
 
 
   public String getType() {

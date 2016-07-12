@@ -11,17 +11,17 @@ import java.util.List;
  */
 public class Job {
 
-  List<String> dims = new ArrayList<>();
+  private List<String> dims = new ArrayList<>();
 
-  Conditions conditions=new Conditions();
+  private Conditions conditions = new Conditions();
 
-  String table;
+  private String table;
 
-  boolean isNeedJoin;
+  private boolean isNeedJoin;
 
-  String joinTable;
+  private String joinTable;
 
-  List<Job> subJobs;
+  private List<Job> subJobs;
 
 
   public void setDims(List<String> dims) {

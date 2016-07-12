@@ -7,17 +7,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class Condition {
 
-
-  public static void main(String[] args){
-
-    String str="'otipc'";
-
-    if(str.startsWith("'")&&str.endsWith("'")){
-      System.out.println("dsaffds");
-    }
-
-  }
-
   private String type;
 
   private String column;

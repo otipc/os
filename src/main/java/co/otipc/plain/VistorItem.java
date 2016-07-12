@@ -30,14 +30,16 @@ public class VistorItem {
       if (expression instanceof Column) {
         Column column = (Column) expression;
         job.getDims().add(column.getColumnName());
-
       } else if (expression instanceof Function) {
+
+        //// TODO: 16/7/12
         Function fun = (Function) expression;
 
         ExpressionList list = fun.getParameters();
         for (int i = 0; i < list.getExpressions().size(); i++) {
 
         }
+        
       }
     }
 

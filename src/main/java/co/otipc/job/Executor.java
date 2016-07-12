@@ -31,7 +31,6 @@ public class Executor {
   private static Conditions conditions;
 
 
-
   public static List<String> exec(Job j) throws IOException {
     job = j;
 
@@ -62,7 +61,7 @@ public class Executor {
   }
 
   private static void setLineResultValue(String source) {
-    List<String> dims = job.dims;
+    List<String> dims = job.getDims();
     if (dims.size() == 1 && equalsIgnoreCase("*", dims.get(0))) {
       result.add(source);
     } else {
@@ -94,8 +93,8 @@ public class Executor {
             String[] ss =
               cond.getValue().toString().substring(1, cond.getValue().toString().length() - 1)
                 .split(",");
-            Set set=new HashSet();
-            for(String str:ss){
+            Set set = new HashSet();
+            for (String str : ss) {
               set.add(str.trim());
             }
             if (!set.contains(line.split(",")[mapIndex.get(cond.getColumn())])) {
@@ -114,12 +113,13 @@ public class Executor {
               setLineResultValue(line);
               return;
             }
-          } if (equalsIgnoreCase("in", cond.getType())) {
+          }
+          if (equalsIgnoreCase("in", cond.getType())) {
             String[] ss =
               cond.getValue().toString().substring(1, cond.getValue().toString().length() - 1)
                 .split(",");
-            Set set=new HashSet();
-            for(String str:ss){
+            Set set = new HashSet();
+            for (String str : ss) {
               set.add(str.trim());
             }
             if (set.contains(line.split(",")[mapIndex.get(cond.getColumn())])) {
