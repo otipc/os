@@ -81,7 +81,7 @@ public class Executor {
       setLineResultValue(line);
     } else {
       String type = conditions.getType();
-      if ("and".equalsIgnoreCase(type)) {
+      if ("and".equalsIgnoreCase(type) || null == type) {
         for (Condition cond : conditions.getItems()) {
           if (equalsIgnoreCase("==", cond.getType())) {
             if (!equalsIgnoreCase(line.split(",")[mapIndex.get(cond.getColumn())],

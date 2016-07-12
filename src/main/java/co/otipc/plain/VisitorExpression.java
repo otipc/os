@@ -22,11 +22,11 @@ import java.util.List;
  */
 public class VisitorExpression {
 
-  //  private static Condition condition;
 
   public static void doExpr(Job job, Expression expression) {
 
     if (expression instanceof AndExpression) {
+
       job.getConditions().setType("AND");
       AndExpression and = (AndExpression) expression;
       Expression left = and.getLeftExpression();
@@ -36,6 +36,7 @@ public class VisitorExpression {
       doExpr(job, left);
 
     } else if (expression instanceof OrExpression) {
+
       job.getConditions().setType("OR");
       OrExpression and = (OrExpression) expression;
       Expression left = and.getLeftExpression();
@@ -45,8 +46,6 @@ public class VisitorExpression {
       doExpr(job, left);
 
     } else {
-
-      job.getConditions().setType("AND");
 
       if (expression instanceof EqualsTo) {
 
@@ -78,21 +77,26 @@ public class VisitorExpression {
         doExpr(job, left);
         ItemsList items = in.getRightItemsList();
         if (items instanceof SubSelect) {
+
           SubSelect subSelect = (SubSelect) items;
           PlainSelect plain = (PlainSelect) subSelect.getSelectBody();
           Job innerJob = new Job();
           VisitorSelect.doSelect(innerJob, plain);
           List<String> result = innerJob.doExec();
           job.getConditions().getItems().getLast().setValue(result);
+
         } else {
+
           job.getConditions().getItems().getLast().setValue(items);
+
         }
 
       } else if (expression instanceof Column) {
-        Column column = (Column) expression;
-        job.getConditions().getItems().getLast().setColumn(column.getColumnName().toString());
+
+        job.getConditions().getItems().getLast().setColumn(((Column) expression).getColumnName().toString());
 
       } else if (expression instanceof Function) {
+
         Function fun = (Function) expression;
 
         ExpressionList list = fun.getParameters();
@@ -100,11 +104,13 @@ public class VisitorExpression {
 
         }
       } else {
+
         String str = expression.toString();
         if (str.startsWith("'") && str.endsWith("'")) {
           str = str.substring(1, str.length() - 1);
         }
         job.getConditions().getItems().getLast().setValue(str);
+
       }
 
     }
