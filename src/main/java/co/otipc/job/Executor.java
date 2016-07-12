@@ -1,6 +1,7 @@
 package co.otipc.job;
 
 import co.otipc.utils.SqlUtils;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
@@ -8,9 +9,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Chaoguo.Cui on 16/7/8.
@@ -19,35 +18,34 @@ public class Executor {
 
   private final static String dir = "/Users/admaster/sql/";
 
-  private Job job;
+  private static Job job;
 
-  private List<String> table_source;
+  private static List<String> table_source;
 
-  private List<String> result;
+  private static List<String> result;
 
-  private String[] columns;
+  private static String[] columns;
 
-  private Map<String, Integer> mapIndex;
+  private static Map<String, Integer> mapIndex;
 
-  private Conditions conditions;
+  private static Conditions conditions;
 
 
 
-  public List<String> exec(Job job) throws IOException {
-    this.job = job;
+  public static List<String> exec(Job j) throws IOException {
+    job = j;
 
-    ClassLoader classLoader = this.getClass().getClassLoader();
-
-    File file = new File(classLoader.getResource("file/" +this.job.getTable()+".txt").getFile());
+    File file = new File(
+      Executor.class.getClassLoader().getResource("file/" + job.getTable() + ".txt").getFile());
 
     result = new ArrayList<>();
-    table_source =
-      FileUtils.readLines(file, Charset.defaultCharset());
+
+    table_source = FileUtils.readLines(file, Charset.defaultCharset());
 
     columns = table_source.get(0).split(",");
     mapIndex = SqlUtils.parserToMap(columns);
 
-    conditions = this.job.getConditions();
+    conditions = job.getConditions();
 
     doGetResultSet();
 
@@ -55,7 +53,7 @@ public class Executor {
 
   }
 
-  private void doGetResultSet() {
+  private static void doGetResultSet() {
 
     for (int i = 1; i < table_source.size(); i++) {
       checkFilter(table_source.get(i));
@@ -63,8 +61,8 @@ public class Executor {
 
   }
 
-  private void setLineResultValue(String source) {
-    List<String> dims = this.job.dims;
+  private static void setLineResultValue(String source) {
+    List<String> dims = job.dims;
     if (dims.size() == 1 && equalsIgnoreCase("*", dims.get(0))) {
       result.add(source);
     } else {
@@ -78,12 +76,12 @@ public class Executor {
     }
   }
 
-  private void checkFilter(String line) {
+  private static void checkFilter(String line) {
 
     if (null == conditions) {
       setLineResultValue(line);
     } else {
-      String type = this.conditions.getType();
+      String type = conditions.getType();
       if ("and".equalsIgnoreCase(type)) {
         for (Condition cond : conditions.getItems()) {
           if (equalsIgnoreCase("==", cond.getType())) {
@@ -92,17 +90,45 @@ public class Executor {
               return;
             }
           }
+          if (equalsIgnoreCase("in", cond.getType())) {
+            String[] ss =
+              cond.getValue().toString().substring(1, cond.getValue().toString().length() - 1)
+                .split(",");
+            Set set=new HashSet();
+            for(String str:ss){
+              set.add(str.trim());
+            }
+            if (!set.contains(line.split(",")[mapIndex.get(cond.getColumn())])) {
+              return;
+            }
+          }
+
         }
         setLineResultValue(line);
 
       } else if ("or".equalsIgnoreCase(type)) {
         for (Condition cond : conditions.getItems()) {
           if ("==".equals(cond.getType())) {
-            if (!line.split(",")[mapIndex.get(cond.getColumn())].equals(cond.getValue())) {
+            if (equalsIgnoreCase(line.split(",")[mapIndex.get(cond.getColumn())],
+              cond.getValue().toString())) {
+              setLineResultValue(line);
+              return;
+            }
+          } if (equalsIgnoreCase("in", cond.getType())) {
+            String[] ss =
+              cond.getValue().toString().substring(1, cond.getValue().toString().length() - 1)
+                .split(",");
+            Set set=new HashSet();
+            for(String str:ss){
+              set.add(str.trim());
+            }
+            if (set.contains(line.split(",")[mapIndex.get(cond.getColumn())])) {
               setLineResultValue(line);
               return;
             }
           }
+
+
         }
       }
 

@@ -2,6 +2,8 @@ package co.otipc.job;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -11,7 +13,7 @@ public class Conditions {
 
   String type = null;
 
-  List<Condition> items;
+  LinkedList<Condition> items = new LinkedList<>();
 
 
   public String getType() {
@@ -22,11 +24,11 @@ public class Conditions {
     this.type = type;
   }
 
-  public List<Condition> getItems() {
+  public LinkedList<Condition> getItems() {
     return items;
   }
 
-  public void setItems(List<Condition> items) {
+  public void setItems(LinkedList<Condition> items) {
     this.items = items;
   }
 

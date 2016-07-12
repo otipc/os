@@ -1,0 +1,5 @@
+id,name,class,grade,addr
+10001,cuichaoguo,2,4,henan
+10002,cui,3,4,henan
+10003,otipc,5,3,shanghai
+10002,cui,4,4,henan

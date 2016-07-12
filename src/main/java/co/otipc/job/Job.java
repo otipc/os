@@ -2,6 +2,7 @@ package co.otipc.job;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class Job {
 
   List<String> dims = new ArrayList<>();
 
-  Conditions conditions ;
+  Conditions conditions=new Conditions();
 
   String table;
 
@@ -46,6 +47,16 @@ public class Job {
 
   public Conditions getConditions() {
     return conditions;
+  }
+
+
+  public List<String> doExec() {
+    try {
+      return Executor.exec(this);
+    } catch (IOException e) {
+
+    }
+    return null;
   }
 
 
