@@ -1,8 +1,15 @@
 package co.otipc.job;
 
+import co.otipc.plain.VisitorExpression;
+import co.otipc.plain.VisitorSelect;
 import co.otipc.utils.SqlUtils;
 import com.google.common.collect.Sets;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
@@ -16,48 +23,158 @@ import java.util.*;
  */
 public class Executor {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(Executor.class);
+
   private final static String dir = "/Users/admaster/sql/";
 
   private static Job job;
-
-  private static List<String> table_source;
-
-  private static List<String> result;
 
   private static String[] columns;
 
   private static Map<String, Integer> mapIndex;
 
-  private static Conditions conditions;
-
-
   public static List<String> exec(Job j) throws IOException {
+
     job = j;
 
-    result = new ArrayList<>();
-
-    table_source = readFile(job.getTable());
-
+    List<String> table_source = readFile(job.getTable());
     columns = table_source.get(0).split(",");
     mapIndex = SqlUtils.parserToMap(columns);
 
-    conditions = job.getConditions();
+    table_source = checkJoin(table_source, job);
 
-    doGetResultSet();
+    //    while (job.isNeedJoin()) {
+    //      List<String> join_result = new ArrayList<>();
+    //      Join join = job.getJoin();
+    //      FromItem fromItem = join.getRightItem();
+    //      if (fromItem instanceof SubSelect) {
+    //        SubSelect subSelect = (SubSelect) fromItem;
+    //        PlainSelect subPs = (PlainSelect) subSelect.getSelectBody();
+    //        if (null != subPs) {
+    //          Job innerJob = new Job();
+    //          VisitorSelect.doSelect(innerJob, subPs);
+    //          join_result = innerJob.doExec();
+    //          //todo  write to temp file
+    //        } else {
+    //          join_result = null;
+    //          //todo join table
+    //        }
+    //      } else if (fromItem instanceof Table) {
+    //        Table table = (Table) fromItem;
+    //        join_result = readFile(table.getName());
+    //        //todo join table
+    //      } else {
+    //
+    //      }
+    //      Conditions joinConditions = null;
+    //      Expression expression = join.getOnExpression();
+    //      if (null != expression) {
+    //        joinConditions = new Conditions();
+    //        VisitorExpression.doExpr(joinConditions, expression);
+    //      }
+    //
+    //      if (join.isSimple() || join.isLeft()) {
+    //        table_source = JoinMethod.doJoin(table_source, join_result, joinConditions);
+    //      } else if (join.isRight()) {
+    //        table_source = JoinMethod.doJoin(join_result, table_source, joinConditions);
+    //      } else if (join.isInner()) {
+    //
+    //      } else if (join.isFull()) {
+    //
+    //      } else if (join.isCross()) {
+    //
+    //      } else if (join.isOuter()) {
+    //
+    //      } else if (join.isNatural()) {
+    //
+    //      } else {
+    //        LOGGER.error(join.toString());
+    //      }
+    //
+    //    }
+
+
+    List<String> result = new ArrayList<>();
+    doGetResultSet(table_source, job.getConditions(), result);
 
     return result;
 
   }
 
-  private static List<String> join(String left_table, String right_table) throws IOException {
+
+  private static List<String> checkJoin(List<String> table_source, Job job) throws IOException {
+
+    while (job.isNeedJoin()) {
+
+      List<String> join_result = new ArrayList<>();
+      Join join = job.getJoin();
+
+      FromItem fromItem = join.getRightItem();
+      if (fromItem instanceof SubSelect) {
+        SubSelect subSelect = (SubSelect) fromItem;
+        PlainSelect subPs = (PlainSelect) subSelect.getSelectBody();
+        if (null != subPs) {
+          Job innerJob = new Job();
+          VisitorSelect.doSelect(innerJob, subPs);
+          join_result = innerJob.doExec();
+          //todo  write to temp file
+        } else {
+          LOGGER.error(subSelect.toString());
+        }
+      } else if (fromItem instanceof Table) {
+        Table table = (Table) fromItem;
+        join_result = readFile(table.getName());
+        //todo join table
+      } else {
+        LOGGER.error(fromItem.toString());
+      }
 
 
-    List<String> left_table_source = readFile(left_table);
-    List<String> right_table_source = readFile(right_table);
+      Conditions joinConditions = null;
+      Expression expression = join.getOnExpression();
+      if (null != expression) {
+        joinConditions = new Conditions();
+        VisitorExpression.doExpr(joinConditions, expression);
+      }
 
-    return JoinMethod.doJoin(left_table_source, right_table_source);
+      if (null != joinConditions) {
+        System.out.println(joinConditions.toString());
+      }
+
+      if (join.isSimple() || join.isLeft()) {
+        table_source = JoinMethod.doJoin(table_source, join_result, joinConditions);
+      } else if (join.isRight()) {
+        table_source = JoinMethod.doJoin(join_result, table_source, joinConditions);
+      } else if (join.isInner()) {
+        table_source = JoinMethod.doJoin(join_result, table_source, joinConditions);
+      } else if (join.isFull()) {
+
+      } else if (join.isCross()) {
+
+      } else if (join.isOuter()) {
+
+      } else if (join.isNatural()) {
+
+      } else {
+        LOGGER.error(join.toString());
+      }
+
+    }
+
+    return table_source;
+
 
   }
+
+  //  private static List<String> execJoin(String left_table, String right_table) throws IOException {
+  //
+  //
+  //    List<String> left_table_source = readFile(left_table);
+  //    List<String> right_table_source = readFile(right_table);
+  //
+  //    return JoinMethod.doJoin(left_table_source, right_table_source);
+  //
+  //  }
 
 
   private static List<String> readFile(File file) throws IOException {
@@ -74,15 +191,16 @@ public class Executor {
 
   }
 
-  private static void doGetResultSet() {
+  private static void doGetResultSet(List<String> source, Conditions conditions,
+    List<String> result) {
 
-    for (int i = 1; i < table_source.size(); i++) {
-      checkFilter(table_source.get(i));
+    for (int i = 1; i < source.size(); i++) {
+      checkFilter(source.get(i), conditions, result);
     }
 
   }
 
-  private static void setLineResultValue(String source) {
+  private static void setLineResultValue(String source, List<String> result) {
     List<String> dims = job.getDims();
     if (dims.size() == 1 && equalsIgnoreCase("*", dims.get(0))) {
       result.add(source);
@@ -97,10 +215,10 @@ public class Executor {
     }
   }
 
-  private static void checkFilter(String line) {
+  private static void checkFilter(String line, Conditions conditions, List<String> result) {
 
     if (null == conditions) {
-      setLineResultValue(line);
+      setLineResultValue(line, result);
     } else {
       String type = conditions.getType();
       if ("and".equalsIgnoreCase(type) || null == type) {
@@ -125,14 +243,14 @@ public class Executor {
           }
 
         }
-        setLineResultValue(line);
+        setLineResultValue(line, result);
 
       } else if ("or".equalsIgnoreCase(type)) {
         for (Condition cond : conditions.getItems()) {
           if ("==".equals(cond.getType())) {
             if (equalsIgnoreCase(line.split(",")[mapIndex.get(cond.getColumn())],
               cond.getValue().toString())) {
-              setLineResultValue(line);
+              setLineResultValue(line, result);
               return;
             }
           }
@@ -145,7 +263,7 @@ public class Executor {
               set.add(str.trim());
             }
             if (set.contains(line.split(",")[mapIndex.get(cond.getColumn())])) {
-              setLineResultValue(line);
+              setLineResultValue(line, result);
               return;
             }
           }

@@ -19,26 +19,11 @@ public class DruidTest {
 
   public static void main(String[] args) {
 
-    int n = 7;
-
-    for (int i = 1; i <= n; i++) {
-      for (int j = 1; j <= i; j++) {
-        System.out.print("*");
-      }
-      System.out.println();
-    }
-
-    for (int i = 1; i <= 9; i++) {
-      for (int j = 1; j <= i; j++) {
-        System.out.print(j);
-      }
-      System.out.println();
-    }
-    System.out.println();
+    test();
 
 
 
-}
+  }
 
   private static int comput(int n) {
     try {
@@ -63,6 +48,18 @@ public class DruidTest {
     System.out.println(ListstmtList.size());
 
     for (SQLStatement statement : ListstmtList) {
+
+      if (statement instanceof SQLSelectStatement) {
+
+        SQLSelectStatement select = (SQLSelectStatement) statement;
+        SQLSelect sqlSelect = select.getSelect();
+
+        System.out.println(sqlSelect.getQuery().getAttributes());
+
+      }
+
+      System.out.println(statement.getClass().getName());
+
       System.out.println(statement.toString());
     }
   }

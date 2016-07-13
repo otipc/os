@@ -6,10 +6,9 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 
@@ -46,7 +45,7 @@ public class MainTest {
     //    4            a20050114         4              2006032404
     //    NULL    NULL                   8              2006032408
 
-    String innerjoin = "SELECT * FROM  a INNER JOIN  b ON a.aID =b.bID ";
+    String innerjoin = "SELECT * FROM  a INNER JOIN  b ON a.aID =b.bID";
     String innerjoin2 = "SELECT *  FROM a,b WHERE a.aID = b.bID";
 
     //    aID        aNum                   bID           bName
@@ -56,9 +55,14 @@ public class MainTest {
     //    4            a20050114         4              2006032404
 
 
-    Statement parse = CCJSqlParserUtil.parse(innerjoin2);
+    Statement parse = CCJSqlParserUtil.parse(innerjoin);
     Select select = (Select) parse;
     PlainSelect ps = (PlainSelect) select.getSelectBody();
+
+    List<WithItem> list = select.getWithItemsList();
+    for (WithItem with : list) {
+      System.out.println(with.toString());
+    }
 
     System.out.println(ps.getSelectItems());
 
@@ -78,6 +82,9 @@ public class MainTest {
       System.out.println(join.isRight());
 
       System.out.println(" === " + join.getRightItem());
+
+      FromItem from = join.getRightItem();
+      System.out.println(from instanceof Table);
       System.out.println(join.getOnExpression());
 
     }
