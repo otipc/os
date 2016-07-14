@@ -52,13 +52,14 @@ public class DruidTest {
       if (statement instanceof SQLSelectStatement) {
 
         SQLSelectStatement select = (SQLSelectStatement) statement;
+        System.out.println(select.toString());
         SQLSelect sqlSelect = select.getSelect();
 
-        System.out.println(sqlSelect.getQuery().getAttributes());
+        System.out.println(sqlSelect.getHints());
+
+
 
       }
-
-      System.out.println(statement.getClass().getName());
 
       System.out.println(statement.toString());
     }

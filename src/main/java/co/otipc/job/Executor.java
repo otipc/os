@@ -43,56 +43,17 @@ public class Executor {
 
     table_source = checkJoin(table_source, job);
 
-    //    while (job.isNeedJoin()) {
-    //      List<String> join_result = new ArrayList<>();
-    //      Join join = job.getJoin();
-    //      FromItem fromItem = join.getRightItem();
-    //      if (fromItem instanceof SubSelect) {
-    //        SubSelect subSelect = (SubSelect) fromItem;
-    //        PlainSelect subPs = (PlainSelect) subSelect.getSelectBody();
-    //        if (null != subPs) {
-    //          Job innerJob = new Job();
-    //          VisitorSelect.doSelect(innerJob, subPs);
-    //          join_result = innerJob.doExec();
-    //          //todo  write to temp file
-    //        } else {
-    //          join_result = null;
-    //          //todo join table
-    //        }
-    //      } else if (fromItem instanceof Table) {
-    //        Table table = (Table) fromItem;
-    //        join_result = readFile(table.getName());
-    //        //todo join table
-    //      } else {
-    //
-    //      }
-    //      Conditions joinConditions = null;
-    //      Expression expression = join.getOnExpression();
-    //      if (null != expression) {
-    //        joinConditions = new Conditions();
-    //        VisitorExpression.doExpr(joinConditions, expression);
-    //      }
-    //
-    //      if (join.isSimple() || join.isLeft()) {
-    //        table_source = JoinMethod.doJoin(table_source, join_result, joinConditions);
-    //      } else if (join.isRight()) {
-    //        table_source = JoinMethod.doJoin(join_result, table_source, joinConditions);
-    //      } else if (join.isInner()) {
-    //
-    //      } else if (join.isFull()) {
-    //
-    //      } else if (join.isCross()) {
-    //
-    //      } else if (join.isOuter()) {
-    //
-    //      } else if (join.isNatural()) {
-    //
-    //      } else {
-    //        LOGGER.error(join.toString());
-    //      }
-    //
-    //    }
-
+//    FROM
+//    ON
+//    JOIN
+//    WHERE
+//    GROUP BY
+//    WITH CUBE or WITH ROLLUP
+//    HAVING
+//    SELECT
+//    DISTINCT
+//    ORDER BY
+//    TOP
 
     List<String> result = new ArrayList<>();
     doGetResultSet(table_source, job.getConditions(), result);
